@@ -158,6 +158,39 @@ lavalust/
 
 ### Database
 
+## Laboratory Exercise 6: Product Management
+
+The project now includes a React product management page and a LavaLust JSON API backed by the existing Aiven MySQL `products` table. The API provides:
+
+- `POST /api/login` — issues a 15 minute bearer token.
+- `POST /api/register` — creates a standard user account and signs it in.
+- `GET /api/products` — lists products (JWT required).
+- `POST /api/products` — creates a product (JWT required).
+- `PUT` or `PATCH /api/products/{id}` — updates a product (JWT required).
+- `DELETE /api/products/{id}` — deletes a product (JWT required).
+
+### Local setup
+
+Copy `.env.example` to `.env` and preserve your existing Aiven database values. Set `DB_DRIVER=mysql`, `DB_CHARSET=utf8mb4`, the Aiven host, port, database, username and password, and set `DB_PREFIX` only if your products table uses a prefix. Keep `.env` out of source control. Account creation uses the same `users` schema as migration `001_create_users_table.php`; the API creates that table on the first login or registration if it does not already exist.
+
+The local setup stores only a password hash for the requested admin password, `admin123`. To regenerate it, run:
+
+```sh
+php -r "echo password_hash('admin123', PASSWORD_DEFAULT), PHP_EOL;"
+```
+
+Set `APP_ADMIN_USERNAME=Admin`, `APP_ADMIN_EMAIL`, and `APP_ADMIN_PASSWORD_HASH` to the generated hash for the requested admin password (`admin123`). Generate two independent random secrets, each at least 32 characters, for `JWT_SECRET` and `REFRESH_TOKEN_KEY`. For example, run `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"` twice. For local use, set `API_ALLOWED_ORIGIN=http://localhost` (or the exact origin/port serving the app). The admin row is created or synchronized on the first login. Open the app at `/`.
+
+The login screen also has a Create an account link. New accounts are assigned the `user` role and receive a token after registration; the configured Admin account has the `admin` role. Keep the admin password hash and token secrets private, and configure these values separately in Render's environment settings.
+
+The existing `products` table must have `id`, `product_name`, `description`, `price`, `quantity`, and `created_at` columns as specified in the exercise. `created_at` should default to `CURRENT_TIMESTAMP`.
+
+### Render deployment
+
+Deploy this repository as the LavaLust API and frontend together, then add the same database and authentication variables in the Render service's Environment settings. Set `APP_ENV=production`, `API_ALLOWED_ORIGIN` to the exact public frontend origin, and set `APP_URL`/base URL to the deployed service URL if your hosting setup requires it. Do not commit `.env` or paste database passwords into source files. The UI uses the same origin's `/api` endpoints, so it can be served by this LavaLust app; if hosting the frontend separately, change the `API` constant in `app/views/products.php` to the deployed API base URL and configure CORS for the frontend origin.
+
+Verify `/` loads, sign in, then add, edit, and delete a product; confirm the row changes in Aiven. The assignment's GitHub/Render URLs and screenshots are submission steps after deployment.
+
 **File:** `app/config/database.php`
 
 ```php
