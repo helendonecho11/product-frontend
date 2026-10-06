@@ -96,7 +96,8 @@ $config['refresh_token_key'] = getenv('REFRESH_TOKEN_KEY') ?: '';
 | already deployed.
 |
 */
-$config['allow_origin'] = getenv('API_ALLOWED_ORIGIN') ?: '*';
+$origins = array_values(array_filter(array_map('trim', explode(',', getenv('ALLOWED_ORIGINS') ?: '')), 'strlen'));
+$config['allow_origin'] = $origins ?: '*';
 
 /*
 |--------------------------------------------------------------------------

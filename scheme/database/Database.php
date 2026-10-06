@@ -268,6 +268,24 @@ class Database {
             PDO::ATTR_EMULATE_PREPARES   => false,
         );
 
+        if ($driver === 'mysql') {
+            $caPath = getenv('DB_SSL_CA') ?: '';
+            $caPem = getenv('DB_SSL_CA_PEM') ?: '';
+            $temporaryCa = null;
+            if ($caPath !== '' && is_file($caPath)) {
+                $options[PDO::MYSQL_ATTR_SSL_CA] = $caPath;
+            } elseif ($caPem !== '') {
+                $temporaryCa = tempnam(sys_get_temp_dir(), 'lavalust-ca-');
+                if ($temporaryCa !== false && file_put_contents($temporaryCa, $caPem) !== false) {
+                    $options[PDO::MYSQL_ATTR_SSL_CA] = $temporaryCa;
+                }
+            }
+            $verify = filter_var(getenv('DB_SSL_VERIFY') ?: 'false', FILTER_VALIDATE_BOOLEAN);
+            if (defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')) {
+                $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = $verify;
+            }
+        }
+
         try {
             $this->db = new PDO($dsn, $username, $password, $options);
             $this->driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
@@ -280,6 +298,7 @@ class Database {
                 $e
             );
         }
+        if (!empty($temporaryCa) && is_file($temporaryCa)) @unlink($temporaryCa);
     }
 
     /**

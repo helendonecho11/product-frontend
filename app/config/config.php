@@ -89,6 +89,7 @@ $config['date_default_timezone'] = 'Asia/Manila';
 |
 */
 $config['base_url'] 				= '';
+$config['allow_origin'] = ($origins = array_values(array_filter(array_map('trim', explode(',', getenv('ALLOWED_ORIGINS') ?: '')), 'strlen'))) ? $origins : '*';
 
 /*
 |--------------------------------------------------------------------------

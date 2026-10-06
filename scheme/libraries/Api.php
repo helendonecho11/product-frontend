@@ -164,6 +164,9 @@ class Api
         if (empty($this->refresh_token_key) || strlen($this->refresh_token_key) < 32) {
             show_error('Refresh token key is missing or too weak.');
         }
+        if (hash_equals($this->jwt_secret, $this->refresh_token_key)) {
+            show_error('JWT secret and refresh token key must be different values.');
+        }
 
         handle_cors();
     }
@@ -321,6 +324,7 @@ class Api
      */
     public function respond($data, $code = 200)
     {
+        header('Content-Type: application/json; charset=utf-8');
         http_response_code($code);
         echo json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         exit;
@@ -491,6 +495,7 @@ class Api
         $refresh_payload = [
             'sub'  => $user_id,
             'type' => 'refresh',
+            'exp'  => $now + $this->refresh_token_expiration,
             'jti'  => bin2hex(random_bytes(16)),
         ];
 

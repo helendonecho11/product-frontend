@@ -1,0 +1,5 @@
+.git
+.env
+api_connection/node_modules
+api_connection/dist
+runtime/logs/*

@@ -4,11 +4,14 @@
 # Environment
 .env
 !.env.example
+.env.*
+!.env.example
 
 # Dependencies
 vendor/
 app/vendor/
 composer.lock
+/api_connection/
 
 # Cache & Logs
 runtime/*
